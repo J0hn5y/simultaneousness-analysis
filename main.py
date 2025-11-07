@@ -1,4 +1,5 @@
-def main():
+def main() -> None:
+    """Main entry point of the application."""
     print("Hello from simultaneousness-analysis!")
 
 
