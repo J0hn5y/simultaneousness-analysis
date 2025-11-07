@@ -1,0 +1,54 @@
+[project]
+name = "simultaneousness-analysis"
+version = "0.1.0"
+description = "This Project aims to determine simultaneousness factors for the use in power grid calculations."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []
+
+#example to include local pakages
+#[tool.uv.sources]
+#bird-feeder = { workspace = true }
+
+[tool.uv.workspace]
+members = ["packages/*"]
+# Example to exclude pakages
+#exclude = ["packages/seeds"]
+
+[tool.ruff]
+select = [
+  "E",    # pycodestyle errors
+  "F",    # pyflakes
+  "I",    # isort
+  "ANN",  # type annotation rules
+  "D",    # pydocstyle (docstring rules)
+  "NPY",  # NumPy-specific rules
+  "PD",   # pandas-specific rules
+  "PL",   # pylint rules
+  "RUF",  # Ruff-specific rules
+  "UP",   # pyupgrade
+]
+ignore = [
+  "E501",  # Ignore line length (handled by formatter)
+  "D100",  # Ignore missing docstring in public module
+  "D104"   # Ignore missing docstring in public package
+]
+line-length = 88
+target-version = "py39"
+fix = true
+show-fixes = true
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.ruff.isort]
+known-third-party = ["numpy", "pandas", "matplotlib"]
+combine-as-imports = true
+force-sort-within-sections = true
+
+
