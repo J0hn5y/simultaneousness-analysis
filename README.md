@@ -1,5 +1,5 @@
 # simultaneousness analysis
-This Project aims to determine simultaneousness factors for the use in power grid calculations. Therefore time series of wheater data (i.e. solar radiation, wind velocity, air temperature,...) with the focus on nothern germany are evaluated. 
+This Project aims to determine simultaneousness factors for the use in power grid calculations. Therefore time series of climate data (i.e. solar radiation, wind velocity, air temperature,...) with the focus on the north of germany are evaluated. 
 
 
 
