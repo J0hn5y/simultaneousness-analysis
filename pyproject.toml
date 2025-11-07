@@ -6,6 +6,11 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = []
 
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+]
+
 #example to include local pakages
 #[tool.uv.sources]
 #bird-feeder = { workspace = true }
@@ -14,6 +19,13 @@ dependencies = []
 members = ["packages/*"]
 # Example to exclude pakages
 #exclude = ["packages/seeds"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
 
 [tool.ruff]
 select = [
@@ -50,5 +62,4 @@ line-ending = "auto"
 known-third-party = ["numpy", "pandas", "matplotlib"]
 combine-as-imports = true
 force-sort-within-sections = true
-
 
