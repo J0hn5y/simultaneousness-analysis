@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "ms-python.python",          // Python support
+    "ms-python.vscode-pylance",  // IntelliSense for Python
+    "charliermarsh.ruff",        // Ruff linter
+    "ms-toolsai.jupyter",        // Jupyter Notebooks support
+    "njpwerner.autodocstring"    // Auto docstring generation    
+  ]
+}
