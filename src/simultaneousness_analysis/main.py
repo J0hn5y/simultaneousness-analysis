@@ -1,23 +1,13 @@
+from .retrieve_data_from_dwd_cdc import main as retrieve_data
+
+# Set True to retrieve data from DWD CDC for station in S-H
+RETRIEVE_DATA: bool = False
+
+
 def main() -> None:
     """Main function."""
-    print("Hello from simultaneousness-analysis!")
-
-
-# def function_without_annotations(a, b):
-#     return a + b
-
-
-def function_with_annotations(a: int, b: int) -> int:
-    """Adds and returns two integers.
-
-    Args:
-        a (int): first integer
-        b (int): second integer
-
-    Returns:
-        int: result of addition
-    """
-    return a + b
+    if RETRIEVE_DATA:
+        retrieve_data()
 
 
 if __name__ == "__main__":

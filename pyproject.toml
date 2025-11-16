@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "This Project aims to determine simultaneousness factors for the use in power grid calculations."
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "pandas>=2.3.3",
+    "requests>=2.32.5",
+]
 
 [dependency-groups]
 dev = [
