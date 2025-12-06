@@ -23,7 +23,8 @@ DATA_DIRECTORIES = {
 
 # DWD CDC URLs and metadata
 BASE_URL: str = (
-    "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/"
+    "http://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/"
+    # use unsecureed HTTP as pd.read_fwf() does not support HTTPS and an ssl error occured
 )
 DATA_URLS: dict[str, str] = {
     "temperature": urljoin(BASE_URL, "10_minutes/air_temperature/historical/"),
