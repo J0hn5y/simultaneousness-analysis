@@ -1,6 +1,7 @@
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
-import pandas as pd
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class DataFrameFilter(Protocol):

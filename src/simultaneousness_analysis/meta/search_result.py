@@ -1,6 +1,8 @@
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from meta.search import MetaSearch
+if TYPE_CHECKING:
+    from meta.search import MetaSearch
 
 
 @dataclass(frozen=True, kw_only=True)

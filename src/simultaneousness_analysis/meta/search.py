@@ -1,6 +1,10 @@
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from meta.config import FILTER_FUNCTIONS
+
+if TYPE_CHECKING:
+    from pandas import Timestamp
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -8,8 +12,8 @@ class MetaSearch:
     """Object containing search parameters and custom filter functions for each parameter."""
 
     measurand_names: list[str] | None = None
-    from_date: pd.Timestamp | None = None
-    to_date: pd.Timestamp | None = None
+    from_date: Timestamp | None = None
+    to_date: Timestamp | None = None
     stations_id: list[int] | None = None
     station_names: list[str] | None = None
     federal_states: list[str] | None = None

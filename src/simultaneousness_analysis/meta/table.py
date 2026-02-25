@@ -1,4 +1,9 @@
-from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from meta.search import MetaSearch
 
 from meta.config import (
     META_JSON_COLUMN_MAPPING,
@@ -6,7 +11,6 @@ from meta.config import (
     META_MEASURAND_MAPPING,
     META_PRODUCT_COLUMNS,
 )
-from meta.search import MetaSearch
 from meta.search_result import MetaSearchResult
 import pandas as pd
 
