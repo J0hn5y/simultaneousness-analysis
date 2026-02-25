@@ -1,3 +1,5 @@
+from meta.column_filter import DataFrameFilter, greater_equal, is_in, less_equal
+
 META_JSON_FILES = (
     "station_metadata_temperature.json",
     "station_metadata_solar.json",
@@ -30,11 +32,11 @@ META_JSON_COLUMN_MAPPING = {
     "Stationsname": "station_name",
 }
 
-FILTER_FUNCTIONS = {
-    "measurand_names": lambda df, value: df[df["measurand_names"].isin(value)],
-    "from_date": lambda df, value: df[df["from_date"] >= value],
-    "to_date": lambda df, value: df[df["to_date"] <= value],
-    "station_ids": lambda df, value: df[df["stations_id"].isin(value)],
-    "station_names": lambda df, value: df[df["station_name"].isin(value)],
-    "federal_states": lambda df, value: df[df["federal_state"].isin(value)],
+FILTER_FUNCTIONS: dict[str, DataFrameFilter] = {
+    "measurand_names": is_in,
+    "from_date": greater_equal,
+    "to_date": less_equal,
+    "stations_id": is_in,
+    "station_names": is_in,
+    "federal_states": is_in,
 }

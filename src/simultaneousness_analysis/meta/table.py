@@ -1,18 +1,28 @@
-from dataclasses import dataclass, field
 from pathlib import Path
 
-from meta_config import (
-    FILTER_FUNCTIONS,
+from meta.config import (
     META_JSON_COLUMN_MAPPING,
     META_JSON_FILES,
     META_MEASURAND_MAPPING,
     META_PRODUCT_COLUMNS,
 )
+from meta.search import MetaSearch
+from meta.search_result import MetaSearchResult
 import pandas as pd
 
 
 class MetaTable:
+    """Table of Meta Data for CDC data set.
+
+    Generated from file names of data files and station metadata from json files. Provides search functionality for data files based on meta data.
+    """
+
     def __init__(self, data_path: Path) -> None:
+        """Initialize MetaTable.
+
+        Args:
+            data_path (Path): Data path to raw data of CDC data set (e.g. "data/cdc/raw").
+        """
         self.data_path = data_path
         self._df_product: pd.Dataframe | None = None
         self._df_stations: pd.Dataframe | None = None
@@ -31,6 +41,12 @@ class MetaTable:
         self.table = self._merge_meta_data()
 
     def _read_file_info(self) -> list[list[any]]:
+        """Reads meta data from file names.
+
+        Returns:
+            list[list[any]]: List of meta data for each file in the format of [measurand, from_date,
+                 to_date, stations_id, type, resolution_value, resolution_unit, format, path].
+        """
         file_paths = list(self.data_path.glob("**/*.txt"))
         # metadata are excluded because they are json files
         file_names = [fp.stem for fp in file_paths]
@@ -50,6 +66,15 @@ class MetaTable:
         return product_list
 
     def _generate_table(self, product_list: list[list[any]]) -> pd.DataFrame:
+        """Generates meta data table from list of meta data from file names (products).
+
+        Args:
+            product_list (list[list[any]]): List of meta data for each file in the format of
+                [measurand, from_date, to_date, stations_id, type, resolution_value, resolution_unit, format, path].
+
+        Returns:
+            pd.DataFrame: Meta data table for all products in the data path.
+        """
         product_kwargs = {
             "columns": META_PRODUCT_COLUMNS,
         }
@@ -73,6 +98,15 @@ class MetaTable:
 
     @staticmethod
     def _read_station_meta_data(data_path_json: Path) -> pd.DataFrame:
+        """Reads station metadata from a JSON file.
+
+        Args:
+            data_path_json (Path): Path to JSON file containing station metadata
+                (e.g. "data/cdc/raw/station_meta_data.json").
+
+        Returns:
+            pd.DataFrame: Station metadata table.
+        """
         df = pd.read_json(data_path_json)
         df = df.drop(
             columns=["von_datum", "bis_datum", "Abgabe"],
@@ -81,15 +115,29 @@ class MetaTable:
         return df
 
     def _merge_station_metadata(self, dfs_metadata: list[pd.DataFrame]) -> pd.DataFrame:
+        """Merges station metadata tables to a single table.
+
+        Args:
+            dfs_metadata (list[pd.DataFrame]):
+                List of all station metadata tables from JSON files for solar, temperature and wind.
+
+        Returns:
+            pd.DataFrame: Merged station metadata table.
+        """
         df_merge_on = dfs_metadata[0].copy()
         for df in dfs_metadata[1:]:
             df_merge_on = df_merge_on.combine_first(df)
         self._df_stations = df_merge_on
         return self._df_stations
 
-    def _merge_meta_data(
-        self,
-    ) -> pd.DataFrame:
+    def _merge_meta_data(self) -> pd.DataFrame:
+        """Merges product meta data table with station metadata table to a single meta data table.
+
+        Also renames columns to english and sets path as index.
+
+        Returns:
+            pd.DataFrame: meta data table with station and product information.
+        """
         df = self._df_product.merge(
             self._df_stations,
             left_on="stations_id",
@@ -107,6 +155,15 @@ class MetaTable:
         self,
         search_param: MetaSearch,
     ) -> MetaSearchResult:
+        """Searches the meta data table with the given search parameters.
+
+        Args:
+            search_param (MetaSearch):
+                Object containing search parameters and custom filter functions for each parameter.
+
+        Returns:
+            MetaSearchResult: Object containinig the list of paths of data files matching the search parameters
+        """
         df = self.table.copy()
 
         for field, value in search_param.__dict__.items():
@@ -115,56 +172,6 @@ class MetaTable:
 
             filter_fn = search_param.filters.get(field)
             if filter_fn is not None:
-                df = filter_fn(df, value)
+                df = filter_fn(df, field, value)
 
         return MetaSearchResult(search=search_param, paths=df.index.tolist())
-
-
-@dataclass(frozen=True, kw_only=True)
-class MetaSearch:
-    measurand_names: list[str] | None = None
-    from_date: pd.Timestamp | None = None
-    to_date: pd.Timestamp | None = None
-    station_ids: list[int] | None = None
-    station_names: list[str] | None = None
-    federal_states: list[str] | None = None
-    filters: dict[str, callable] = field(
-        repr=False,
-        init=False,
-        default_factory=lambda: FILTER_FUNCTIONS,
-    )
-
-
-@dataclass(frozen=True, kw_only=True)
-class MetaSearchResult:
-    search: MetaSearch
-    paths: list[str] | None = None
-
-    @property
-    def length(self) -> int:
-        return len(self.paths) if self.paths is not None else 0
-
-
-def main() -> None:
-    data_path = Path.cwd() / "data" / "cdc" / "raw"
-    meta_table = MetaTable(data_path=data_path)
-    # print(f"{meta_table._df_product.head()=}")
-    # print(f"{meta_table._df_stations.head()=}")
-    print(f"{meta_table.table.head()=}")
-
-    # Define search parameters
-    search_param = MetaSearch(
-        measurand_names=["solar radiation"],
-        from_date=pd.Timestamp(year=2020, month=1, day=1),
-        station_ids=[1200, 2961],
-    )
-    # Search meta table with search parameters
-    search_result = meta_table.search(search_param=search_param)
-
-    # access search results
-    print(f"{search_result.paths=}")
-    print(f"{search_result.length=}")
-
-
-if __name__ == "__main__":
-    main()
