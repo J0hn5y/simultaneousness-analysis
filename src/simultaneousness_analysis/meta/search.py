@@ -1,10 +1,19 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from .config import FILTER_FUNCTIONS
+from .column_filter import DataFrameFilter, greater_equal, is_in, less_equal
 
 if TYPE_CHECKING:
     from pandas import Timestamp
+
+FILTER_FUNCTIONS: dict[str, DataFrameFilter] = {
+    "measurand_names": is_in,
+    "from_date": greater_equal,
+    "to_date": less_equal,
+    "stations_id": is_in,
+    "station_names": is_in,
+    "federal_states": is_in,
+}
 
 
 @dataclass(frozen=True, kw_only=True)

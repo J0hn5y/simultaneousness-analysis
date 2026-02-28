@@ -1,4 +1,3 @@
-# from meta.search import MetaSearch
 from pandas import Timestamp
 import pytest
 
@@ -36,6 +35,7 @@ def test_meta_search_with_station_names() -> None:
     names = ["Flensburg", "Schleswig"]
     search = MetaSearch(station_names=names)
     assert search.station_names == names
+    assert search.federal_states is None
 
 
 def test_meta_search_with_federal_states() -> None:
@@ -43,6 +43,7 @@ def test_meta_search_with_federal_states() -> None:
     states = ["Schleswig-Holstein", "Hamburg"]
     search = MetaSearch(federal_states=states)
     assert search.federal_states == states
+    assert search.measurand_names is None
 
 
 def test_meta_search_with_from_date() -> None:
@@ -68,6 +69,24 @@ def test_meta_search_frozen() -> None:
         search.measurand_names = ["wind speed"]
 
 
+def test_meta_search_all_parameters() -> None:
+    """Test MetaSearch with all parameters set."""
+    search = MetaSearch(
+        measurand_names=["air temperature"],
+        stations_id=[1200],
+        from_date=Timestamp(year=2000, month=1, day=1),
+        to_date=Timestamp(year=2020, month=12, day=31),
+        station_names=["Elpersbüttel"],
+        federal_states=["Schleswig-Holstein"],
+    )
+    assert search.measurand_names == ["air temperature"]
+    assert search.stations_id == [1200]
+    assert search.station_names == ["Elpersbüttel"]
+    assert search.federal_states == ["Schleswig-Holstein"]
+    assert search.from_date == Timestamp(year=2000, month=1, day=1)
+    assert search.to_date == Timestamp(year=2020, month=12, day=31)
+
+
 def test_meta_search_filters_default() -> None:
     """Test that filters are populated with default values."""
     search = MetaSearch()
@@ -77,15 +96,11 @@ def test_meta_search_filters_default() -> None:
     assert callable(search.filters["measurand_names"])
 
 
-def test_meta_search_all_parameters() -> None:
-    """Test MetaSearch with all parameters set."""
-    search = MetaSearch(
-        measurand_names=["air temperature"],
-        stations_id=[1200],
-        station_names=["Elpersbüttel"],
-        federal_states=["Schleswig-Holstein"],
-    )
-    assert search.measurand_names == ["air temperature"]
-    assert search.stations_id == [1200]
-    assert search.station_names == ["Elpersbüttel"]
-    assert search.federal_states == ["Schleswig-Holstein"]
+def test_meta_search_filters_for_each_attribute() -> None:
+    """Test that there is a filter for each attribute."""
+    search = MetaSearch()
+    for attr in search.__dataclass_fields__:
+        if attr == "filters":
+            continue
+        assert attr in search.filters
+        assert callable(search.filters[attr])

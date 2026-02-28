@@ -16,6 +16,8 @@ def run_meta_analysis() -> None:
     # print(f"{meta_table._df_product.head()=}")
     # print(f"{meta_table._df_stations.head()=}")
     print(f"{meta_table.table.head()=}")
+    meta_table.export(suffix="json")
+    meta_table.export(suffix="xlsx")
 
     search_param = MetaSearch(
         measurand_names=["solar radiation"],

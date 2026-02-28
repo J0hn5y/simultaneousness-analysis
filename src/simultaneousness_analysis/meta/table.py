@@ -5,6 +5,7 @@ if TYPE_CHECKING:
 
     from .search import MetaSearch
 
+from matplotlib import path
 import pandas as pd
 
 from .config import (
@@ -180,3 +181,32 @@ class MetaTable:
                 df = filter_fn(df, field, value)
 
         return MetaSearchResult(search=search_param, paths=df.index.tolist())
+
+    def export(self, suffix: str = "json", path: Path | None = None) -> None:
+        """Exports the meta data table to an Excel file.
+
+        Args:
+            path (Path): Path to save the Excel file
+                if none is provided, it will be saved in the data path with the name "meta_table.xlsx"
+
+            suffix (str): Suffix of the file format to export, either "json" or "xlsx". Default is "json".
+
+        Raises:
+            ValueError: If the meta data table is not generated yet.
+        """
+        if self.table is None:
+            raise ValueError("Meta data table is not generated yet.")
+
+        valid_suffixes = ["json", "xlsx"]
+        if suffix not in valid_suffixes:
+            msg = f"Invalid suffix '{suffix}'. Valid suffixes are: {valid_suffixes}."
+            raise ValueError(msg)
+
+        if path is None:
+            path = self.data_path / f"meta_table.{suffix}"
+
+        if suffix == "json":
+            self.table.to_json(path, orient="records", indent=4)
+        if suffix == "xlsx":
+            with pd.ExcelWriter(path) as writer:
+                self.table.to_excel(writer, sheet_name="Meta Table")

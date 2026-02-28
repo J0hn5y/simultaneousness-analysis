@@ -1,5 +1,3 @@
-from .column_filter import DataFrameFilter, greater_equal, is_in, less_equal
-
 META_JSON_FILES = (
     "station_metadata_temperature.json",
     "station_metadata_solar.json",
@@ -30,13 +28,4 @@ META_JSON_COLUMN_MAPPING = {
     "geoBreite": "latitude",
     "geoLaenge": "longitude",
     "Stationsname": "station_name",
-}
-
-FILTER_FUNCTIONS: dict[str, DataFrameFilter] = {
-    "measurand_names": is_in,
-    "from_date": greater_equal,
-    "to_date": less_equal,
-    "stations_id": is_in,
-    "station_names": is_in,
-    "federal_states": is_in,
 }
