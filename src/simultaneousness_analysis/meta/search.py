@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from meta.config import FILTER_FUNCTIONS
+from .config import FILTER_FUNCTIONS
 
 if TYPE_CHECKING:
     from pandas import Timestamp

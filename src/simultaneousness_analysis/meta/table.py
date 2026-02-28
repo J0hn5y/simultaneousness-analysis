@@ -3,16 +3,17 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from meta.search import MetaSearch
+    from .search import MetaSearch
 
-from meta.config import (
+import pandas as pd
+
+from .config import (
     META_JSON_COLUMN_MAPPING,
     META_JSON_FILES,
     META_MEASURAND_MAPPING,
     META_PRODUCT_COLUMNS,
 )
-from meta.search_result import MetaSearchResult
-import pandas as pd
+from .search_result import MetaSearchResult
 
 
 class MetaTable:

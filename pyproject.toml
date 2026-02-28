@@ -10,6 +10,13 @@ dependencies = [
     "requests>=2.32.5",
 ]
 
+[project.scripts]
+sim = "simultaneousness_analysis:main"
+
+[build-system]
+requires = ["uv_build>=0.10.7,<0.11.0"]
+build-backend = "uv_build"
+
 [dependency-groups]
 dev = [
     "ipykernel>=7.1.0",
@@ -22,16 +29,18 @@ dev = [
 #bird-feeder = { workspace = true }
 
 [tool.uv.workspace]
-members = ["packages/*"]
+members = [
+    "packages/*"
+]
 # Example to exclude pakages
 #exclude = ["packages/seeds"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "-ra -q"
-testpaths = [
-    "tests",
-]
+#testpaths = [
+#    "tests",
+#]
 
 [tool.ruff]
 #src = ["src", "tests", "packages"]

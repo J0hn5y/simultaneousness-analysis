@@ -1,4 +1,4 @@
-from meta.column_filter import DataFrameFilter, greater_equal, is_in, less_equal
+from .column_filter import DataFrameFilter, greater_equal, is_in, less_equal
 
 META_JSON_FILES = (
     "station_metadata_temperature.json",
