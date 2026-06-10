@@ -67,7 +67,7 @@ class ExcelTableOptions:
     coordinate_columns: frozenset[str] | None = None
 
 
-def _sanitize_table_name(name: str) -> str:
+def _normalize_table_name(name: str) -> str:
     """Normalize a raw table name so it is valid in Excel.
 
     This replaces invalid characters with underscores and ensures the name
@@ -141,32 +141,50 @@ def _style_data_cells(
         dataframe: Dataframe used to define the table range.
         options: Styling options that include column-specific formats.
     """
+    # Iterate rows
     for row in worksheet.iter_rows(
         min_row=2,
         max_row=worksheet.max_row,
         max_col=dataframe.shape[1],
     ):
+        # Iterate cells in row
         for column_index, cell in enumerate(row, start=1):
             cell.alignment = DEFAULT_CELL_ALIGNMENT
-            if isinstance(cell.value, (datetime, date)) and not isinstance(
-                cell.value,
-                bool,
-            ):
+            # bool is not a number, but should not be formatted as text, so check for it first
+            if isinstance(cell.value, bool):
+                continue
+            # check for date/datetime
+            if isinstance(cell.value, (datetime, date)):
                 cell.number_format = DEFAULT_DATE_FORMAT
-            elif isinstance(cell.value, Number) and not isinstance(cell.value, bool):
-                column_name = dataframe.columns[column_index - 1]
-                if (
-                    options.integer_columns is not None
-                    and column_name in options.integer_columns
-                ):
-                    cell.number_format = DEFAULT_INTEGER_FORMAT
-                elif (
-                    options.coordinate_columns is not None
-                    and column_name in options.coordinate_columns
-                ):
-                    cell.number_format = DEFAULT_COORDINATE_FORMAT
-                else:
-                    cell.number_format = DEFAULT_NUMERIC_FORMAT
+                continue
+            # Skip non-numeric cells
+            if not isinstance(cell.value, Number):
+                continue
+            column_name = dataframe.columns[column_index - 1]
+            cell.number_format = _number_format_for_column(column_name, options)
+
+
+def _number_format_for_column(
+    column_name: str,
+    options: ExcelTableOptions,
+) -> str:
+    """Return the numeric format for a column based on styling options.
+
+    Args:
+        column_name: Name of the dataframe column.
+        options: Options containing integer and coordinate column sets.
+
+    Returns:
+        A number format string for Excel cell formatting.
+    """
+    if options.integer_columns is not None and column_name in options.integer_columns:
+        return DEFAULT_INTEGER_FORMAT
+    if (
+        options.coordinate_columns is not None
+        and column_name in options.coordinate_columns
+    ):
+        return DEFAULT_COORDINATE_FORMAT
+    return DEFAULT_NUMERIC_FORMAT
 
 
 def _apply_column_widths(
@@ -204,7 +222,7 @@ def create_excel_table(
         options = ExcelTableOptions()
 
     table_name = options.table_name or f"Table_{worksheet.title}"
-    table_name = _sanitize_table_name(table_name)
+    table_name = _normalize_table_name(table_name)
     end_column = get_column_letter(dataframe.shape[1])
     end_row = dataframe.shape[0] + 1
     table_ref = f"A1:{end_column}{end_row}"
