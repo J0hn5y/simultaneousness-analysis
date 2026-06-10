@@ -8,6 +8,7 @@ from matplotlib import path
 import pandas as pd
 
 from ..excel import ExcelTableOptions, create_excel_table
+from ..geo_utils import air_distance_km, get_coordinates
 from .config import (
     META_JSON_COLUMN_MAPPING,
     META_JSON_FILES,
@@ -156,6 +157,71 @@ class MetaTable:
         df = df.set_index("path")
         self.table = df
         return self.table
+
+    def get_nearest_station_id_by_coordinates(
+        self,
+        latitude: float,
+        longitude: float,
+    ) -> int:
+        """Return the nearest station id for the given coordinates.
+
+        Args:
+            latitude (float): Latitude in decimal degrees.
+            longitude (float): Longitude in decimal degrees.
+
+        Returns:
+            int: The ``stations_id`` of the nearest station.
+        """
+        # Note: this rebuilds the station coordinate subset on each call.
+        # If many nearest-station lookups are needed, cache the stations frame
+        # once when the meta table is built.
+        stations = self.table.reset_index()[["stations_id", "latitude", "longitude"]]
+        stations["distance_km"] = stations.apply(
+            lambda row: air_distance_km(
+                (latitude, longitude),
+                (float(row["latitude"]), float(row["longitude"])),
+            ),
+            axis=1,
+        )
+
+        nearest_index = stations["distance_km"].idxmin()
+        return int(stations.loc[nearest_index, "stations_id"])
+
+    def get_nearest_station_id_by_address(
+        self,
+        street: str,
+        house_number: str,
+        zip_code: str,
+        city: str,
+    ) -> int:
+        """Convert a German address to coordinates (latitude, longitude) and return the nearest station id.
+
+        Args:
+            street (str): Street name of the address.
+            house_number (str): House number of the address.
+            zip_code (str): Postal code (ZIP) of the address.
+            city (str): City of the address.
+
+        Returns:
+            int: The ``stations_id`` of the nearest station.
+
+        Raises:
+            ValueError: If geocoding fails and coordinates cannot be obtained.
+        """
+        try:
+            latitude, longitude = get_coordinates(
+                street=street,
+                house_number=house_number,
+                zip_code=zip_code,
+                city=city,
+            )
+        # Reraise geocoding errors with more context about the address that failed
+        except ValueError as exc:
+            address = f"{street} {house_number}, {zip_code} {city}, Germany"
+            msg = f"Geocoding failed for address: {address}"
+            raise ValueError(msg) from exc
+
+        return self.get_nearest_station_id_by_coordinates(latitude, longitude)
 
     def search(
         self,

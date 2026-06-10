@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from .geo_utils import air_distance_km, get_coordinates
 from .meta import MetaSearch, MetaSearchResult, MetaTable
 from .retrieve_data_from_dwd_cdc import main as retrieve_data
 
@@ -30,6 +31,16 @@ def run_meta_analysis() -> None:
     # access search results
     print(f"{search_result.paths=}")
     print(f"{search_result.length=}")
+
+    # Example: find the nearest station by German address
+    address = {
+        "street": "Rathausplatz",
+        "house_number": "1",
+        "zip_code": "24103",
+        "city": "Kiel",
+    }
+    station_id = meta_table.get_nearest_station_id_by_address(**address)
+    print(f"Nearest station id for Kiel address: {station_id}")
 
 
 def main() -> None:
