@@ -1,13 +1,13 @@
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from .search import MetaSearch
 
 from matplotlib import path
 import pandas as pd
 
+from ..excel import ExcelTableOptions, create_excel_table
 from .config import (
     META_JSON_COLUMN_MAPPING,
     META_JSON_FILES,
@@ -208,5 +208,16 @@ class MetaTable:
         if suffix == "json":
             self.table.to_json(path, orient="records", indent=4)
         if suffix == "xlsx":
-            with pd.ExcelWriter(path) as writer:
-                self.table.to_excel(writer, sheet_name="Meta Table")
+            with pd.ExcelWriter(path, engine="openpyxl") as writer:
+                dataframe_export = self.table.reset_index()
+                dataframe_export.to_excel(writer, sheet_name="Meta Table", index=False)
+                worksheet = writer.sheets["Meta Table"]
+                options = ExcelTableOptions(
+                    integer_columns={"stations_id"},
+                    coordinate_columns={"latitude", "longitude"},
+                )
+                create_excel_table(
+                    worksheet=worksheet,
+                    dataframe=dataframe_export,
+                    options=options,
+                )
