@@ -8,16 +8,16 @@ Main features:
 
 Submodules:
 - meta: Metadata search, filtering, and table utilities
-- main: Main entry point for running analyses
+- retrieve_data_from_dwd_cdc: Data retrieval from DWD CDC
 
 See the README for usage examples and development workflow.
 """
 
 from . import meta
-from .main import main
+from .retrieve_data_from_dwd_cdc import main as retrieve_data
 
 # Define __all__ to control what is exported with 'from simultaneousness_analysis import *'
 __all__ = [
     "meta",
-    "main",
+    "retrieve_data",
 ]
