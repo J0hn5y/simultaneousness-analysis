@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 
+from simultaneousness_analysis.meta.search import MetaNearestStationResult
 import simultaneousness_analysis.meta.table as table_mod
 from simultaneousness_analysis.meta.table import MetaTable
 
@@ -24,7 +25,10 @@ def test_get_nearest_by_coordinates():
 
     # Coordinates chosen near Kiel -> expect the nearest station to be station 2.
     station = mt.get_nearest_station_id_by_coordinates(54.32, 10.12)
-    assert station == 2
+    assert station == MetaNearestStationResult(
+        stations_id=2,
+        distance_km=pytest.approx(0.41, abs=0.05),
+    )
 
 
 def test_get_nearest_by_address(monkeypatch):
@@ -45,4 +49,7 @@ def test_get_nearest_by_address(monkeypatch):
         "24103",
         "Kiel",
     )
-    assert station == 2
+    assert station == MetaNearestStationResult(
+        stations_id=2,
+        distance_km=pytest.approx(0.0, abs=1e-6),
+    )

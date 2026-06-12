@@ -1,3 +1,6 @@
-from .search import MetaSearch
-from .search_result import MetaSearchResult
+from .search import (
+    MetaSearch,
+    MetaSearchResult,
+    MetaNearestStationResult,
+)
 from .table import MetaTable

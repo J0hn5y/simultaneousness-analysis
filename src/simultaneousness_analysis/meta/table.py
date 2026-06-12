@@ -1,10 +1,10 @@
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .search import MetaSearch
 
-from matplotlib import path
 import pandas as pd
 
 from ..excel import ExcelTableOptions, create_excel_table
@@ -15,7 +15,7 @@ from .config import (
     META_MEASURAND_MAPPING,
     META_PRODUCT_COLUMNS,
 )
-from .search_result import MetaSearchResult
+from .search import MetaNearestStationResult, MetaSearchResult
 
 
 class MetaTable:
@@ -162,15 +162,15 @@ class MetaTable:
         self,
         latitude: float,
         longitude: float,
-    ) -> int:
-        """Return the nearest station id for the given coordinates.
+    ) -> MetaNearestStationResult:
+        """Return the nearest station result for the given coordinates.
 
         Args:
             latitude (float): Latitude in decimal degrees.
             longitude (float): Longitude in decimal degrees.
 
         Returns:
-            int: The ``stations_id`` of the nearest station.
+            MetaNearestStationResult: The nearest station id and the distance in kilometers.
         """
         # Note: this rebuilds the station coordinate subset on each call.
         # If many nearest-station lookups are needed, cache the stations frame
@@ -185,7 +185,10 @@ class MetaTable:
         )
 
         nearest_index = stations["distance_km"].idxmin()
-        return int(stations.loc[nearest_index, "stations_id"])
+        return MetaNearestStationResult(
+            stations_id=int(stations.loc[nearest_index, "stations_id"]),
+            distance_km=float(stations.loc[nearest_index, "distance_km"]),
+        )
 
     def get_nearest_station_id_by_address(
         self,
@@ -193,8 +196,8 @@ class MetaTable:
         house_number: str,
         zip_code: str,
         city: str,
-    ) -> int:
-        """Convert a German address to coordinates (latitude, longitude) and return the nearest station id.
+    ) -> MetaNearestStationResult:
+        """Convert a German address to coordinates (latitude, longitude) and return the nearest station result.
 
         Args:
             street (str): Street name of the address.
@@ -203,7 +206,7 @@ class MetaTable:
             city (str): City of the address.
 
         Returns:
-            int: The ``stations_id`` of the nearest station.
+            MetaNearestStationResult: The nearest station id and the distance in kilometers.
 
         Raises:
             ValueError: If geocoding fails and coordinates cannot be obtained.

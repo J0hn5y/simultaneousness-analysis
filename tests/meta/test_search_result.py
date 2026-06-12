@@ -2,8 +2,7 @@ from dataclasses import FrozenInstanceError
 
 import pytest
 
-from simultaneousness_analysis.meta.search import MetaSearch
-from simultaneousness_analysis.meta.search_result import MetaSearchResult
+from simultaneousness_analysis.meta.search import MetaSearch, MetaSearchResult
 
 
 @pytest.fixture
