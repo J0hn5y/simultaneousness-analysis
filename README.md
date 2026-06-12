@@ -42,6 +42,36 @@ To make changes to the package and ensure a smooth development experience, follo
 
 This workflow ensures that your environment is always up to date, imports work without hacks, and dependency management is simple and reproducible.
 
+## Nearest Station Lookup
+
+The package now supports finding the nearest DWD station from either:
+- a German postal address, or
+- explicit latitude/longitude coordinates.
+
+Example usage:
+
+```python
+from pathlib import Path
+from simultaneousness_analysis.meta import MetaTable
+
+meta_table = MetaTable(data_path=Path("data/cdc/raw"))
+nearest = meta_table.get_nearest_station_id_by_coordinates(
+    latitude=54.769328,
+    longitude=9.568905,
+)
+print(nearest.stations_id, nearest.distance_km)
+
+nearest_address = meta_table.get_nearest_station_id_by_address(
+    street="Rathausplatz",
+    house_number="1",
+    zip_code="24103",
+    city="Kiel",
+)
+print(nearest_address.stations_id, nearest_address.distance_km)
+```
+
+This is useful for spatial queries and finding the best station for climate data analysis in northern Germany.
+
 ## Additional Development Instructions
 
 ### How to install and sync dependencies
