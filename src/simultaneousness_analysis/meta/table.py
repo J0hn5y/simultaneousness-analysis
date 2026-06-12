@@ -1,14 +1,15 @@
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .search import MetaSearch
+    from pathlib import Path
 
+    from .search import MetaSearch
 import pandas as pd
 
-from ..excel import ExcelTableOptions, create_excel_table
-from ..geo_utils import air_distance_km, get_coordinates
+from simultaneousness_analysis.excel import ExcelTableOptions, create_excel_table
+from simultaneousness_analysis.geo_utils import air_distance_km, get_coordinates
+
 from .config import (
     META_JSON_COLUMN_MAPPING,
     META_JSON_FILES,
@@ -16,6 +17,18 @@ from .config import (
     META_PRODUCT_COLUMNS,
 )
 from .search import MetaNearestStationResult, MetaSearchResult
+
+
+@dataclass(frozen=True, kw_only=True)
+class MetaStationInfo:
+    """Metadata for a station, returned by station info lookups."""
+
+    stations_id: int
+    station_name: str | None
+    federal_state: str | None
+    latitude: float | None
+    longitude: float | None
+    altitude: float | None
 
 
 class MetaTable:
@@ -157,6 +170,43 @@ class MetaTable:
         df = df.set_index("path")
         self.table = df
         return self.table
+
+    def get_station_info(self, station_id: int) -> MetaStationInfo:
+        """Return metadata for the given station id.
+
+        Args:
+            station_id (int): Station identifier.
+
+        Returns:
+            MetaStationInfo: Station metadata including name, state, coordinates and altitude.
+
+        Raises:
+            ValueError: If the meta data table is not generated yet.
+            KeyError: If no station exists with the given station id.
+        """
+        if self._df_stations is None:
+            raise ValueError("Meta data table is not generated yet.")
+
+        station_meta = self._df_stations.rename(columns=META_JSON_COLUMN_MAPPING)
+        if station_id not in station_meta.index:
+            msg = f"Station id {station_id} not found"
+            raise KeyError(msg)
+
+        row = station_meta.loc[station_id]
+        station_name = row.get("station_name")
+        federal_state = row.get("federal_state")
+        latitude = row.get("latitude")
+        longitude = row.get("longitude")
+        altitude = row.get("altitude")
+
+        return MetaStationInfo(
+            stations_id=int(station_id),
+            station_name=None if pd.isna(station_name) else str(station_name),
+            federal_state=None if pd.isna(federal_state) else str(federal_state),
+            latitude=None if pd.isna(latitude) else float(latitude),
+            longitude=None if pd.isna(longitude) else float(longitude),
+            altitude=None if pd.isna(altitude) else float(altitude),
+        )
 
     def get_nearest_station_id_by_coordinates(
         self,

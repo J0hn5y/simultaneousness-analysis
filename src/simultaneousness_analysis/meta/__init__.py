@@ -3,4 +3,4 @@ from .search import (
     MetaSearchResult,
     MetaNearestStationResult,
 )
-from .table import MetaTable
+from .table import MetaStationInfo, MetaTable

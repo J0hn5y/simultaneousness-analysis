@@ -3,7 +3,7 @@ import pytest
 
 from simultaneousness_analysis.meta.search import MetaNearestStationResult
 import simultaneousness_analysis.meta.table as table_mod
-from simultaneousness_analysis.meta.table import MetaTable
+from simultaneousness_analysis.meta.table import MetaStationInfo, MetaTable
 
 
 def _sample_table():
@@ -28,6 +28,30 @@ def test_get_nearest_by_coordinates():
     assert station == MetaNearestStationResult(
         stations_id=2,
         distance_km=pytest.approx(0.41, abs=0.05),
+    )
+
+
+def test_get_station_info():
+    mt = object.__new__(MetaTable)
+    mt._df_stations = pd.DataFrame(
+        {
+            "Stationsname": ["A", "B"],
+            "Bundesland": ["StateA", "StateB"],
+            "geoBreite": [54.5, 54.3],
+            "geoLaenge": [9.4, 10.1],
+            "Stationshoehe": [10.0, 20.0],
+        },
+        index=[1, 2],
+    )
+
+    station_info = mt.get_station_info(2)
+    assert station_info == MetaStationInfo(
+        stations_id=2,
+        station_name="B",
+        federal_state="StateB",
+        latitude=54.3,
+        longitude=10.1,
+        altitude=20.0,
     )
 
 
